@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seconds Until...</title>
+    <style>
+        body {
+            background-color: #ffffff; /* White background */
+            color: #000000; /* Black text */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"; /* Clean sans-serif */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh; /* Full viewport height */
+            margin: 0;
+            flex-direction: column; /* Stack elements vertically */
+            padding: 20px; /* Add some padding */
+            box-sizing: border-box;
+        }
+
+        .container {
+            text-align: center; /* Center text within the container */
+            max-width: 900px; /* Prevent content from getting too wide on large screens */
+            width: 100%;
+        }
+
+        #countdown-number {
+            font-size: 4em; /* Large font size for the number */
+            font-weight: bold;
+            margin-bottom: 10px;
+            word-break: break-all; /* Break long numbers */
+        }
+
+        #event-label {
+            font-size: 1.2em;
+            margin-bottom: 30px;
+        }
+
+        #event-selector {
+            margin-top: 20px;
+            display: flex; /* Arrange buttons in a row */
+            flex-wrap: wrap; /* Wrap buttons if needed */
+            justify-content: center; /* Center the buttons */
+            gap: 10px; /* Space between buttons */
+        }
+
+        #event-selector button {
+            background: none;
+            border: 1px solid #000000; /* Black border */
+            color: #000000; /* Black text */
+            padding: 10px 15px;
+            margin: 0; /* Gap is handled by flexbox gap */
+            cursor: pointer;
+            font-size: 1em;
+            font-family: inherit; /* Use the same clean font */
+            transition: background-color 0.2s ease; /* Smooth hover effect */
+            white-space: nowrap; /* Prevent button text from wrapping */
+        }
+
+        #event-selector button:hover {
+            background-color: #f0f0f0; /* Light grey on hover */
+        }
+
+        #event-selector button:active {
+            background-color: #e0e0e0; /* Slightly darker on click */
+        }
+
+        /* Style for the currently selected button */
+        #event-selector button.active {
+            background-color: #000000;
+            color: #ffffff;
+        }
+
+        /* Optional: Add a subtle pulsing animation to the number (less Neal.fun, but sometimes used) */
+        /* Not implementing the "subtle countdown" described in concept as it's complex with huge numbers in JS */
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="countdown-number"></div>
+        <div id="event-label"></div>
+
+        <div id="event-selector">
+            <!-- Buttons will be added here by JavaScript -->
+        </div>
+    </div>
+
+    <script>
+        // --- Data: Future Events (Simplified) ---
+        // Note: Using simplified "seconds from now" is an estimate for demonstration.
+        // A real version would need more precise astronomical data or target dates.
+        // The seconds are approximations: 1 year ≈ 31,536,000 seconds.
+        const events = [
+            { name: 'until the sun becomes a red giant', secondsFromNow: 5e9 * 31536000 }, // ~5 billion years
+            { name: 'until the Andromeda galaxy collides with the Milky Way', secondsFromNow: 4.5e9 * 31536000 }, // ~4.5 billion years
+            { name: 'until Earth becomes uninhabitable due to greenhouse effect', secondsFromNow: 1.1e9 * 31536000 }, // ~1.1 billion years
+            { name: 'until the heat death of the universe (estimated)', secondsFromNow: 10e100 * 31536000 }, // A truly massive, conceptual number
+             { name: 'until a random Tuesday in 1000 years', secondsFromNow: 1000 * 31536000 }, // A relatively 'close' event
+        ];
+
+        // --- HTML Element References ---
+        const countdownNumberEl = document.getElementById('countdown-number');
+        const eventLabelEl = document.getElementById('event-label');
+        const eventSelectorEl = document.getElementById('event-selector');
+
+        let currentEventIndex = 0; // Start with the first event
+
+        // --- Helper Function: Format Number with Commas ---
+        function formatNumber(num) {
+            // Use toLocaleString for easy formatting with commas/spaces
+            return num.toLocaleString('en-US'); // Or 'en-GB' for spaces, depends on preference
+        }
+
+        // --- Function to Update Display ---
+        function updateDisplay(event) {
+            // For simplicity, we're just displaying the pre-calculated estimated seconds from "now".
+            // A truly accurate version would calculate the difference between the current time
+            // and a target future timestamp for the event.
+            const secondsRemaining = Math.max(0, Math.floor(event.secondsFromNow)); // Ensure it's not negative
+
+            countdownNumberEl.textContent = formatNumber(secondsRemaining);
+            eventLabelEl.textContent = `seconds ${event.name}`;
+
+            // Update active button styling
+            const buttons = eventSelectorEl.querySelectorAll('button');
+            buttons.forEach((button, index) => {
+                if (index === currentEventIndex) {
+                    button.classList.add('active');
+                } else {
+                    button.classList.remove('active');
+                }
+            });
+        }
+
+        // --- Initialization ---
+        function init() {
+            // Create buttons for each event
+            events.forEach((event, index) => {
+                const button = document.createElement('button');
+                button.textContent = event.name.replace('until ', ''); // Button text is just the event name
+                button.addEventListener('click', () => {
+                    currentEventIndex = index;
+                    updateDisplay(events[currentEventIndex]);
+                });
+                eventSelectorEl.appendChild(button);
+            });
+
+            // Display the first event initially
+            updateDisplay(events[currentEventIndex]);
+        }
+
+        // Run initialization when the page loads
+        init();
+
+        // Note: This version does NOT tick down the number in real-time,
+        // as the numbers are so large that a second ticking by is negligible
+        // and unnecessary for the core concept display. The number updates only when the event is changed.
+        // A real-time countdown would require calculating the time difference
+        // between Date.now() and a future timestamp and updating periodically,
+        // which is more complex and doesn't add much value for these huge numbers.
+
+
+    </script>
+</body>
+</html>
