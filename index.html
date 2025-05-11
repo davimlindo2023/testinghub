@@ -88,78 +88,94 @@
     </div>
 
     <script>
-        // --- Data: Future Events (Simplified) ---
-        // Note: Using simplified "seconds from now" is an estimate for demonstration.
-        // A real version would need more precise astronomical data or target dates.
-        // The seconds are approximations: 1 year ≈ 31,536,000 seconds.
-        const events = [
-            { name: 'until the sun becomes a red giant', secondsFromNow: 5e9 * 31536000 }, // ~5 billion years
-            { name: 'until the Andromeda galaxy collides with the Milky Way', secondsFromNow: 4.5e9 * 31536000 }, // ~4.5 billion years
-            { name: 'until Earth becomes uninhabitable due to greenhouse effect', secondsFromNow: 1.1e9 * 31536000 }, // ~1.1 billion years
-            { name: 'until the heat death of the universe (estimated)', secondsFromNow: 10e100 * 31536000 }, // A truly massive, conceptual number
-             { name: 'until a random Tuesday in 1000 years', secondsFromNow: 1000 * 31536000 }, // A relatively 'close' event
-        ];
+       <script>
+    const SECONDS_IN_YEAR = 31536000;
 
-        // --- HTML Element References ---
-        const countdownNumberEl = document.getElementById('countdown-number');
-        const eventLabelEl = document.getElementById('event-label');
-        const eventSelectorEl = document.getElementById('event-selector');
-
-        let currentEventIndex = 0; // Start with the first event
-
-        // --- Helper Function: Format Number with Commas ---
-        function formatNumber(num) {
-            // Use toLocaleString for easy formatting with commas/spaces
-            return num.toLocaleString('en-US'); // Or 'en-GB' for spaces, depends on preference
+    const events = [
+        {
+            name: 'until the sun becomes a red giant',
+            yearsFromNow: 5e9
+        },
+        {
+            name: 'until the Andromeda galaxy collides with the Milky Way',
+            yearsFromNow: 4.5e9
+        },
+        {
+            name: 'until Earth becomes uninhabitable due to greenhouse effect',
+            yearsFromNow: 1.1e9
+        },
+        {
+            name: 'until the heat death of the universe (estimated)',
+            yearsFromNow: 1e100 // Extremely large number
+        },
+        {
+            name: 'until a random Tuesday in 1000 years',
+            yearsFromNow: 1000
         }
+    ];
 
-        // --- Function to Update Display ---
-        function updateDisplay(event) {
-            // For simplicity, we're just displaying the pre-calculated estimated seconds from "now".
-            // A truly accurate version would calculate the difference between the current time
-            // and a target future timestamp for the event.
-            const secondsRemaining = Math.max(0, Math.floor(event.secondsFromNow)); // Ensure it's not negative
+    // Get HTML elements
+    const countdownNumberEl = document.getElementById('countdown-number');
+    const eventLabelEl = document.getElementById('event-label');
+    const eventSelectorEl = document.getElementById('event-selector');
 
+    let currentEventIndex = 0;
+    let intervalID = null;
+
+    // Convert years into target timestamps
+    events.forEach(event => {
+        if (event.yearsFromNow > Number.MAX_SAFE_INTEGER / SECONDS_IN_YEAR) {
+            event.targetTimestamp = Infinity;
+        } else {
+            event.targetTimestamp = Date.now() + (event.yearsFromNow * SECONDS_IN_YEAR * 1000);
+        }
+    });
+
+    function formatNumber(num) {
+        return num.toLocaleString('en-US');
+    }
+
+    function updateDisplay(event) {
+        if (intervalID) clearInterval(intervalID);
+
+        function refresh() {
+            const now = Date.now();
+            if (!isFinite(event.targetTimestamp)) {
+                countdownNumberEl.textContent = "∞";
+                eventLabelEl.textContent = `seconds ${event.name} (effectively infinite)`;
+                return;
+            }
+
+            const secondsRemaining = Math.max(0, Math.floor((event.targetTimestamp - now) / 1000));
             countdownNumberEl.textContent = formatNumber(secondsRemaining);
             eventLabelEl.textContent = `seconds ${event.name}`;
-
-            // Update active button styling
-            const buttons = eventSelectorEl.querySelectorAll('button');
-            buttons.forEach((button, index) => {
-                if (index === currentEventIndex) {
-                    button.classList.add('active');
-                } else {
-                    button.classList.remove('active');
-                }
-            });
         }
 
-        // --- Initialization ---
-        function init() {
-            // Create buttons for each event
-            events.forEach((event, index) => {
-                const button = document.createElement('button');
-                button.textContent = event.name.replace('until ', ''); // Button text is just the event name
-                button.addEventListener('click', () => {
-                    currentEventIndex = index;
-                    updateDisplay(events[currentEventIndex]);
-                });
-                eventSelectorEl.appendChild(button);
+        refresh(); // update immediately
+        intervalID = setInterval(refresh, 1000); // update every second
+
+        const buttons = eventSelectorEl.querySelectorAll('button');
+        buttons.forEach((button, index) => {
+            button.classList.toggle('active', index === currentEventIndex);
+        });
+    }
+
+    function init() {
+        events.forEach((event, index) => {
+            const button = document.createElement('button');
+            button.textContent = event.name.replace('until ', '');
+            button.addEventListener('click', () => {
+                currentEventIndex = index;
+                updateDisplay(events[currentEventIndex]);
             });
+            eventSelectorEl.appendChild(button);
+        });
 
-            // Display the first event initially
-            updateDisplay(events[currentEventIndex]);
-        }
+        updateDisplay(events[currentEventIndex]);
+    }
 
-        // Run initialization when the page loads
-        init();
-
-        // Note: This version does NOT tick down the number in real-time,
-        // as the numbers are so large that a second ticking by is negligible
-        // and unnecessary for the core concept display. The number updates only when the event is changed.
-        // A real-time countdown would require calculating the time difference
-        // between Date.now() and a future timestamp and updating periodically,
-        // which is more complex and doesn't add much value for these huge numbers.
+    init();
+</script>
 
 
     </script>
